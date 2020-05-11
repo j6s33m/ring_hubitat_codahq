@@ -994,12 +994,17 @@ private getRequests(parts) {
       ]
     ],
 	"snapshot-update": [
-		method: GET,
+		method: PUT,
 		synchronous: true,
 		type: "bearer",
 	  params: [
         uri: "https://api.ring.com",
-        path: "/clients_api/snapshots/update_all"
+        path: "/clients_api/snapshots/update_all",
+		requestContentType: JSON,
+		body: [
+			"refresh": true,
+			"doorbot_ids": state.dingables.collect { it -> it.toInteger() }
+		]
       ],
       headers: [
         "User-Agent": "ring_official_windows/2.4.0",
@@ -1150,7 +1155,7 @@ def doAction(type, method, params, data) {
 }
 
 def doSynchronousAction(type, method, params, data) {
-  logDebug "doSynchronousAction($type, $method, $data)"
+  logDebug "doSynchronousAction($type, $method, $params, $data)"
   def retval
   try {
     "${type}"(params) { response ->
@@ -1257,6 +1262,8 @@ def responseHandler(response, params) {
         msg: body
       ])
     }
+	else if (params.method == "snapshot-update") {
+	}
     else if (params.method == "snapshot-image") {
       response.properties.each { log.warn it }
 	  byte[] array = new byte[response.data.available()];

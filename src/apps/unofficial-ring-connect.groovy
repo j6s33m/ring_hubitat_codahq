@@ -278,9 +278,11 @@ def ifttt() {
 def pollingPage() {
 
   unschedule(pollDings)
+  unschedule(pollSnapshots)
   if (dingPolling) {
     setupDingables()
     pollDings()
+	pollSnapshots()
   }
 
   dynamicPage(name: "pollingPage", title: "Configure settings to poll for motions and rings:", uninstall: false) {
@@ -291,8 +293,9 @@ def pollingPage() {
     }
     section("Polling Configuration") {
       preferences {
-        input name: "dingPolling", type: "bool", title: "Poll for motion and rings", defaultValue: false, submitOnChange: true
+        input name: "dingPolling", type: "bool", title: "Poll for motion, rings, and snapshots", defaultValue: false, submitOnChange: true
         input name: "dingInterval", type: "number", range: "8..20", title: "Number of seconds in between motion/ring polls", defaultValue: 15, submitOnChange: true
+		input name: "snapshotInterval", type: "number", range: "1..30", title: "Number of minutes in between thumbnail polls", defaultValue: 3, submitOnChange: true
       }
     }
   }
@@ -476,9 +479,11 @@ def installed() {
 def updated() {
   unsubscribe()
   unschedule(pollDings)
+  unschedule(pollSnapshots)
   if (dingPolling) {
     setupDingables()
     pollDings()
+	pollSnapshots()
   }
   initialize()
 }
@@ -691,6 +696,15 @@ def pollDings() {
   simpleRequest("dings")
   if (dingPolling) {
     runIn(dingInterval, pollDings)
+  }
+}
+
+def pollSnapshots() {
+  simpleRequest("snapshot-update")
+  for (dingable in state.dingables)
+		simpleRequest("snapshot-image", [dni: "RING-"+dingable])
+  if (dingPolling) {
+    runIn(snapshotInterval*60, pollSnapshots)
   }
 }
 
@@ -967,12 +981,11 @@ private getRequests(parts) {
     ],
     "snapshot-image": [
       method: GET,
-      synchronous: false,
+      synchronous: true,
       type: "bearer",
       params: [
         uri: "https://api.ring.com",
-        path: "/clients_api/snapshots/image/${getRingDeviceId(parts.dni)}",
-        requestContentType: JSON
+        path: "/clients_api/snapshots/image/${getRingDeviceId(parts.dni)}"
       ],
       headers: [
         "User-Agent": "ring_official_windows/2.4.0",
@@ -980,6 +993,20 @@ private getRequests(parts) {
         "Accept": "application.vnd.api.v11+json"
       ]
     ],
+	"snapshot-update": [
+		method: GET,
+		synchronous: true,
+		type: "bearer",
+	  params: [
+        uri: "https://api.ring.com",
+        path: "/clients_api/snapshots/update_all"
+      ],
+      headers: [
+        "User-Agent": "ring_official_windows/2.4.0",
+        "Hardware_ID": state.appDeviceId,
+        "Accept": "application.vnd.api.v11+json"
+      ]
+	],
     "subscribe": [
       method: PUT,
       type: "bearer",
@@ -1077,7 +1104,7 @@ def simpleRequest(type, data = [:]) {
   //if (type == "subscribe") return
 
   if (request.synchronous) {
-    return doSynchronousAction(request.method, type, params)
+    return doSynchronousAction(request.method, type, params, data)
   }
   else {
     doAction(request.method, type, params, data)
@@ -1122,12 +1149,12 @@ def doAction(type, method, params, data) {
   }
 }
 
-def doSynchronousAction(type, method, params) {
-  logDebug "doSynchronousAction($type, $method, params)"
+def doSynchronousAction(type, method, params, data) {
+  logDebug "doSynchronousAction($type, $method, $data)"
   def retval
   try {
     "${type}"(params) { response ->
-      retval = responseHandler(response, [method: method])
+      retval = responseHandler(response, [method: method, data: data])
     }
   }
   catch (ex) {
@@ -1232,12 +1259,15 @@ def responseHandler(response, params) {
     }
     else if (params.method == "snapshot-image") {
       response.properties.each { log.warn it }
+	  byte[] array = new byte[response.data.available()];
+      response.data.read(array);
+	  
       getChildDevice(params.data.dni).childParse(params.method, [
         response: response.getStatus(),
         action: params.data.action,
         kind: params.data.params?.kind,
         //jpg: "data:image/png;base64,${response.data.encodeBase64().toString()}"
-        jpg: "<img src=\"data:image/png;base64,${response.data.encodeBase64().toString()}\" alt=\"Snapshot\" />"
+        jpg: "<img src=\"data:image/png;base64,${array.encodeBase64().toString()}\" alt=\"Snapshot\" />"
       ])
     }
     //else if (params.method == "tickets") {

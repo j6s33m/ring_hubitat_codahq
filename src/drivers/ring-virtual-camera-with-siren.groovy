@@ -37,6 +37,8 @@ metadata {
 
     command "getDings"
     command "test"
+	
+	attribute "snapshot", "string"
   }
 
   preferences {
@@ -123,9 +125,19 @@ def childParse(type, params) {
   else if (type == "snapshot-image") {
     state.snapshot = params.jpg
   }
+  else if (type == "snapshot-image") {
+	logTrace "snapshot-image"
+	handleSnapshot(params.jpg)
+  }
   else {
     log.error "Unhandled type ${type}"
   }
+}
+
+private handleSnapshot(jpg) {
+  logTrace "handleSnapshot(${jpg})"
+
+  sendEvent(name: "snapshot", value: jpg)
 }
 
 private handleRefresh(json) {

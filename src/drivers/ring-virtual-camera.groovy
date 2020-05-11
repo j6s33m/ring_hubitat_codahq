@@ -36,6 +36,8 @@ metadata {
     capability "PushableButton"
 
     command "getDings"
+	
+	attribute "snapshot", "string"
   }
 
   preferences {
@@ -96,9 +98,19 @@ def childParse(type, params) {
     logTrace "dings"
     handleDings(params.type, params.msg)
   }
+  else if (type == "snapshot-image") {
+	logTrace "snapshot-image"
+	handleSnapshot(params.jpg)
+  }
   else {
     log.error "Unhandled type ${type}"
   }
+}
+
+private handleSnapshot(jpg) {
+  logTrace "handleSnapshot(${jpg})"
+
+  sendEvent(name: "snapshot", value: jpg)
 }
 
 private handleRefresh(json) {

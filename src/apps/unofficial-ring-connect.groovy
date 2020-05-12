@@ -1265,7 +1265,6 @@ def responseHandler(response, params) {
 	else if (params.method == "snapshot-update") {
 	}
     else if (params.method == "snapshot-image") {
-      response.properties.each { log.warn it }
 	  byte[] array = new byte[response.data.available()];
       response.data.read(array);
 	  

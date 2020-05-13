@@ -52,7 +52,7 @@ function loadJSON(path, callback, data) {
     };
     xobj.send(null);  
  }
-loadJSON("/layout",function(response) {
+ function resultProcessor(response) {
       var data = JSON.parse(response);
 	  for (i = 0; i < data.tiles.length; i++) {
 		  var t = data.tiles[i]
@@ -72,14 +72,16 @@ loadJSON("/layout",function(response) {
 		  }
 	  }
 
-    });
+    }
+loadJSON("/layout",resultProcessor);
+setInterval(function() {loadJSON("/layout",resultProcessor) }, 30000);
 '>'''
 
     // Minified version of the above
     // https://javascript-minifier.com/
     myScript = '''
 <img style="display: none;" src='' onerror='
-function loadJSON(e,t,a){var n=new URLSearchParams(window.location.search),r=new XMLHttpRequest;r.overrideMimeType("application/json"),r.open("GET",window.location.href.split("?")[0]+e,!0),r.withCredentials=!0,r.setRequestHeader("Authorization","Bearer "+n.get("access_token")),r.onreadystatechange=function(){4==r.readyState&&"200"==r.status&&t(r.responseText,a)},r.send(null)}loadJSON("/layout",function(e){var t=JSON.parse(e);for(i=0;i<t.tiles.length;i++){var a=t.tiles[i];"attribute"==a.template&&"snapshot"==a.templateExtra&&loadJSON("/device/"+a.device,function(e,t){var a=JSON.parse(e);for(j=0;j<a[0].attr.length;j++){var n=a[0].attr[j];null!=n.snapshot&&(document.querySelector("#tile-"+t+" .tile-primary").innerHTML=n.snapshot)}},a.id),"attribute"==a.template&&"javascript"==a.templateExtra&&(document.querySelector("#tile-"+a.id).style.display="none")}});
+function loadJSON(e,t,a){var r=new URLSearchParams(window.location.search),o=new XMLHttpRequest;o.overrideMimeType("application/json"),o.open("GET",window.location.href.split("?")[0]+e,!0),o.withCredentials=!0,o.setRequestHeader("Authorization","Bearer "+r.get("access_token")),o.onreadystatechange=function(){4==o.readyState&&"200"==o.status&&t(o.responseText,a)},o.send(null)}function resultProcessor(e){var t=JSON.parse(e);for(i=0;i<t.tiles.length;i++){var a=t.tiles[i];"attribute"==a.template&&"snapshot"==a.templateExtra&&loadJSON("/device/"+a.device,function(e,t){var a=JSON.parse(e);for(j=0;j<a[0].attr.length;j++){var r=a[0].attr[j];null!=r.snapshot&&(document.querySelector("#tile-"+t+" .tile-primary").innerHTML=r.snapshot)}},a.id),"attribute"==a.template&&"javascript"==a.templateExtra&&(document.querySelector("#tile-"+a.id).style.display="none")}}loadJSON("/layout",resultProcessor),setInterval(function(){loadJSON("/layout",resultProcessor)},3e4);
 '>'''
 
     // now() is to make the string unique each time, but is not needed in production...

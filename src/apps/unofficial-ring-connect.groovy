@@ -484,7 +484,7 @@ def updated() {
 	pollSnapshots()
 	
 	schedule("0/${dingInterval} * * * * ? *", pollDings)
-	schedule("* 0/${snapshotInterval} * * * ? *", pollSnapshots)
+	schedule("* */${snapshotInterval} * * * ? *", pollSnapshots)
   }
   initialize()
 }

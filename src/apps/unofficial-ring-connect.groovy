@@ -276,9 +276,8 @@ def ifttt() {
 }
 
 def pollingPage() {
+  unschedule()
 
-  unschedule(pollDings)
-  unschedule(pollSnapshots)
   if (dingPolling) {
     setupDingables()
     pollDings()
@@ -478,12 +477,14 @@ def installed() {
 
 def updated() {
   unsubscribe()
-  unschedule(pollDings)
-  unschedule(pollSnapshots)
+  unschedule()
   if (dingPolling) {
     setupDingables()
     pollDings()
 	pollSnapshots()
+	
+	schedule("0/${dingInterval} * * * * ? *", pollDings)
+	schedule("* 0/${snapshotInterval} * * * ? *", pollSnapshots)
   }
   initialize()
 }
@@ -694,18 +695,13 @@ def setupDingables() {
 
 def pollDings() {
   simpleRequest("dings")
-  if (dingPolling) {
-    runIn(dingInterval, pollDings)
-  }
+
 }
 
 def pollSnapshots() {
   simpleRequest("snapshot-update")
   for (dingable in state.dingables)
 		simpleRequest("snapshot-image", [dni: "RING-"+dingable])
-  if (dingPolling) {
-    runIn(snapshotInterval*60, pollSnapshots)
-  }
 }
 
 

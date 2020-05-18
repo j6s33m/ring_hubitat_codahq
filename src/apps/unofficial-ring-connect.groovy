@@ -521,6 +521,10 @@ mappings {
     action:
     [POST: "processIFTTT"]
   }
+  path("/snapshot/:deviceid") {
+    action:
+	[GET: "retrieveSnapshot"]
+  }
 }
 
 /**
@@ -569,6 +573,15 @@ def processIFTTT() {
   if (d && (json.kind == "motion" || json.kind == "ding")) {
     d.childParse("dings", [msg: json, type: "IFTTT"])
   }
+}
+
+def retrieveSnapshot() {
+	def camera = getChildDevices()?.find {
+          it.deviceNetworkId == getFormattedDNI(params.deviceid)
+        }
+	if (camera) {
+		 render contentType: "image/svg+xml", data: "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" height=\"360\" width=\"640\"><image width=\"640\" height=\"360\" xlink:href=\"data:image/png;base64,${camera.getDataValue("snapshot")}\"/></svg>", status: 200
+	}
 }
 
 def getDevices() {
@@ -1263,14 +1276,14 @@ def responseHandler(response, params) {
     else if (params.method == "snapshot-image") {
 	  byte[] array = new byte[response.data.available()];
       response.data.read(array);
-	  
-      getChildDevice(params.data.dni).childParse(params.method, [
+	  def child = getChildDevice(params.data.dni)
+      child.childParse(params.method, [
         response: response.getStatus(),
         action: params.data.action,
         kind: params.data.params?.kind,
-        //jpg: "data:image/png;base64,${response.data.encodeBase64().toString()}"
-        jpg: "<img src=\"data:image/png;base64,${array.encodeBase64().toString()}\" alt=\"Snapshot\" />"
+        jpg: array.encodeBase64().toString()
       ])
+	  child.sendEvent(name: "snapshot", value: "<img style=\"height:100%; width:100%\"  src=\"${getFullApiServerUrl()}/snapshot/${child.getDataValue("device_id")}?access_token=${atomicState.accessToken}\">")
     }
     //else if (params.method == "tickets") {
     //  getChildDevice(data.dni).childParse(type, [response: resp.getStatus(), msg: body])

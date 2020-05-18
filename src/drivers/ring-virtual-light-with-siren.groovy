@@ -201,7 +201,7 @@ def childParse(type, params) {
 private handleSnapshot(jpg) {
   logTrace "handleSnapshot(${jpg})"
 
-  sendEvent(name: "snapshot", value: jpg)
+  updateDataValue("snapshot", jpg)
 }
 
 private handleRefresh(json) {

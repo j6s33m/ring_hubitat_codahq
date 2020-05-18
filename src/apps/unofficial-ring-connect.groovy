@@ -1283,7 +1283,7 @@ def responseHandler(response, params) {
         kind: params.data.params?.kind,
         jpg: array.encodeBase64().toString()
       ])
-	  child.sendEvent(name: "snapshot", value: "<img style=\"height:100%; width:100%\"  src=\"${getFullApiServerUrl()}/snapshot/${child.getDataValue("device_id")}?access_token=${atomicState.accessToken}\">")
+	  child.sendEvent(name: "snapshot", value: "<img style=\"height:100%; width:100%\"  src=\"${getFullLocalApiServerUrl()}/snapshot/${child.getDataValue("device_id")}?access_token=${atomicState.accessToken}\" onerror=\"this.src='${getFullApiServerUrl()}/snapshot/${child.getDataValue("device_id")}?access_token=${atomicState.accessToken}'; this.onerror=null;\">")
     }
     //else if (params.method == "tickets") {
     //  getChildDevice(data.dni).childParse(type, [response: resp.getStatus(), msg: body])

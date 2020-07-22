@@ -741,6 +741,7 @@ private getDEVICE_TYPES() {
 
     "hp_cam_v1": [name: "Ring Floodlight Cam", driver: "Ring Virtual Light with Siren", dingable: true],
     "hp_cam_v2": [name: "Ring Spotlight Cam Wired", driver: "Ring Virtual Light with Siren", dingable: true],
+    "spotlightw_v2": [name: "Ring Spotlight Cam Wired", driver: "Ring Virtual Light with Siren", dingable: true],
     "floodlight_v2": [name: "Ring Floodlight Cam Wired", driver: "Ring Virtual Light with Siren", dingable: true],
     "stickup_cam": [name: "Ring Original Stick Up Cam", driver: "Ring Virtual Camera", dingable: true],
     "stickup_cam_v3": [name: "Ring Stick Up Cam", driver: "Ring Virtual Camera", dingable: true],

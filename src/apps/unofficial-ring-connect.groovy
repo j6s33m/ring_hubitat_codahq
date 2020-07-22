@@ -36,7 +36,7 @@
  *  2020-02-29: Chime Pro v2 support
  *              Removed session functionality since it's no longer needed
  *              Changed namespace
- *
+ *  2020-07-21: Added support for second version of Spotlight Wired Camera 
  *
  */
 
